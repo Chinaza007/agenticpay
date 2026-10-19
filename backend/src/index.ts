@@ -88,6 +88,8 @@ import { cohortAnalyticsRouter } from './routes/cohort-analytics.js';
 import { churnPredictionRouter } from './routes/churn-prediction.js';
 import { slackRouter } from './routes/slack.js';
 import { githubIntegrationRouter } from './routes/github-integration.js';
+import { pluginsRouter } from './routes/plugins.js';
+import { devWebhookRouter } from './routes/dev/webhook.js';
 import { funnelTrackingRouter } from './routes/funnel-tracking.js';
 import { mlForecastRouter } from './routes/ml-forecast.js';
 import { abTestingRouter } from './routes/ab-testing.js';
@@ -262,6 +264,11 @@ app.use(cacheControlNoStore);
 app.use(healthRouter);
 app.use('/docs', docsRouter);
 
+// Local webhook inspection endpoint. Never expose it in production.
+if (!config.isProd) {
+  app.use('/api/dev/webhooks', devWebhookRouter);
+}
+
 // Cold start monitoring dashboard — available before auth/rate-limit middleware
 app.use('/api/v1/cold-start', coldStartMonitorRouter);
 
@@ -344,6 +351,7 @@ apiV1Router.use('/analytics/cohorts', cohortAnalyticsRouter);
 apiV1Router.use('/analytics/churn', churnPredictionRouter);
 apiV1Router.use('/integrations/slack', slackRouter);
 apiV1Router.use('/integrations/github', githubIntegrationRouter);
+apiV1Router.use('/plugins', pluginsRouter);
 apiV1Router.use('/funnels', funnelTrackingRouter);
 apiV1Router.use('/forecast/ml', mlForecastRouter);
 apiV1Router.use('/ab-tests', abTestingRouter);
